@@ -1,0 +1,107 @@
+﻿@{
+    ViewBag.Title = "Home Page";
+}
+
+<div class="jumbotron">
+    <h1>SUMMERNOTE</h1>
+    <p class="lead">Summernote is a Super Simple WYSIWYG Editor on Bootstrap.</p>
+    <p><a target="_blank" href="http://summernote.org" class="btn btn-primary btn-lg">Learn more &raquo;</a></p>
+</div>
+
+<div class="row">
+    <div class="col-md-4">
+        <h2>Getting started</h2>
+        <p>
+            An overview of summernote, how to download and use, basic features and examples, and more.
+        </p>
+        <p>
+            <a class="btn btn-default" href="http://summernote.org/getting-started/">Learn more &raquo;</a>
+        </p>
+    </div>
+    <div class="col-md-4">
+        <h2>Deep dive</h2>
+        <p>Customize summernote's components, toolbar, plugins to get your very own version.</p>
+        <p>
+            <a class="btn btn-default" href="http://summernote.org/deep-dive/">Learn more &raquo;</a>
+        </p>
+    </div>
+    <div class="col-md-4">
+        <h2>Examples</h2>
+        <p>See all useful features of summernote in action.</p>
+        <p>
+            <a class="btn btn-default" href="http://summernote.org/examples/">Learn more &raquo;</a>
+        </p>
+    </div>
+</div>
+
+<h2>Summernote Example</h2>
+
+@using (Html.BeginForm())
+{
+    <div class="row">
+        <div class="col-md-12">
+            @Html.TextArea("Summernote")
+        </div>
+        <div class="col-md-12">
+            <button class="btn btn-primary" type="submit">Save</button>
+        </div>
+    </div>
+}
+
+<h2>Result after submit</h2>
+<div class="row">
+    <div class="col-md-12">
+        @if (ViewBag.Summernote != null)
+        {
+            @Html.Raw(ViewBag.Summernote)
+        }
+    </div>
+    <div class="col-md-12">
+        <textarea class="form-control">
+            @if (ViewBag.Summernote != null)
+            {
+                @ViewBag.Summernote
+            }
+        </textarea>
+    </div>
+</div>
+
+@section scripts {
+    <!-- include summernote css/js-->
+    <link href="http://cdnjs.cloudflare.com/ajax/libs/summernote/0.8.1/summernote.css" rel="stylesheet">
+    <script src="http://cdnjs.cloudflare.com/ajax/libs/summernote/0.8.1/summernote.js"></script>
+
+    <script>
+        $(document).ready(function () {
+            
+            $('#Summernote').summernote({
+                callbacks: {
+                    onImageUpload: function (files) {
+                        sendFile(files[0]);
+                    }
+                }
+            });
+
+            // Hàm upload file lên server
+            function sendFile(file) {
+                var data = new FormData();
+                data.append("file", file);
+                $.ajax({
+                    data: data,
+                    type: "POST",
+                    // Gọi action: SummernoteUploadImage trong controller: HomeController
+                    url: '@Url.Action("SummernoteUploadImage", "Home")',
+                    cache: false,
+                    contentType: false,
+                    processData: false,
+                    success: function (response) {
+                        // Sau khi upload lên Server, chèn image vào đúng vị trí trong Editor.
+                        $('#Summernote').summernote('insertImage', response.Url, function ($image) {
+                            $image.css('width', $image.width());
+                        });
+                    }
+                });
+            }
+        });
+    </script>
+}
